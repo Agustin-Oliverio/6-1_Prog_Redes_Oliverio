@@ -8,6 +8,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import Utils.enumType;
+
 public class Connection {
 		
 	private int port = 2006;
@@ -38,6 +40,18 @@ public class Connection {
 		}
 	}
 	
+	public Connection(enumType type, String iP, int puerto) throws UnknownHostException, IOException {
+		ps = new PrintStream( System.out );
+		direction = InetAddress.getByName(iP);
+
+		switch(type)
+		{
+		case CLIENT:
+			sockC = new Socket(iP,puerto);
+			break;	
+		}		
+	}
+
 	public int getPort() {
 		return port;
 	}

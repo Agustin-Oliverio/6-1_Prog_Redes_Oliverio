@@ -11,7 +11,7 @@ public class mainCliente {
 	public static void main(String[] args) {
 		
 		try {
-			Cliente cli = new Cliente(enumType.CLIENT);
+			Cliente cli = new Cliente(enumType.CLIENT, "127.0.0.1" , 2006);
 			
 			cli.clientOn();
 		} catch (IOException ex) {
