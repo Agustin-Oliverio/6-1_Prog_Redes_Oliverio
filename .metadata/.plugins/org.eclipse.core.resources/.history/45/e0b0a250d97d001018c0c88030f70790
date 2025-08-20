@@ -1,0 +1,24 @@
+package Clase_hilos;
+
+import java.io.PrintStream;
+
+public class TareaRunnable implements Runnable {
+ 
+	private String nombreArchivo = "";
+	private String color = "";
+	PrintStream ps = new PrintStream (System.out);
+	
+	public TareaRunnable( String nombreArchivo,  String color) {
+		
+		this.nombreArchivo = nombreArchivo;
+		this.color = color;
+
+	
+	}
+	
+	@Override
+	public void run() {
+		ps.println(color + "[" + this.getName() + "] preparando recursos para " + nombreArchivo + Utils.RESET);
+		TareaEjecutar.TareaEjecutar(nombreArchivo, "Thread", color);
+		ps.println(color + "[" + this.getName() + "] Libreando recursos de " + nombreArchivo + Utils.RESET);
+}

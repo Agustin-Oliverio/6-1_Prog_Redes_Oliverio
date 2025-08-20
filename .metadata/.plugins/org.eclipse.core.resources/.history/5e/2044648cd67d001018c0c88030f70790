@@ -1,0 +1,12 @@
+package Clase_hilos;
+
+public class TareaEjecutar {
+		private static PrintStream ps = new PrintStream(System.out);
+		public static void TareaEjecutar(String nombre, String tipo, String color) {
+		
+		ArrayList<String> pasos = new ArrayList<>(
+				Arrays.asList("Descargando","Verificando","Descomprimiendo","Procesando","Finalizando"));
+		
+		
+		}
+}
