@@ -2,7 +2,7 @@
 <section name="Workbench">
 	<section name="MavenProjectWizardLocationPage">
 		<list key="location">
-			<item value="C:\Users\Redes-04\Documents\GitHub\6-1_Prog_Redes_Oliverio"/>
+			<item value="C:\Users\Redes-04\Documents\GitHub\25-Prog-Redes\introducionJava\src\main\java\EjemploResolucionTPs\main.java"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>
@@ -47,12 +47,11 @@
 			<item value="ar.edu.et32"/>
 		</list>
 		<list key="name">
-			<item value="Socket_e_hilos"/>
-			<item value="Sockets_e_hilos"/>
+			<item value="Thread-Socket"/>
 		</list>
 		<list key="artifactId">
-			<item value="Socket_e_hilos"/>
-			<item value="Sockets_e_hilos"/>
+			<item value="Thread-Socket"/>
+			<item value="Socket"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>

@@ -1,0 +1,86 @@
+package SocketConThread;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.util.ArrayList;
+
+import Download.Utils;
+
+public class Servidor {
+
+	
+	PrintStream ps = new PrintStream(System.out);
+	ArrayList<cli> clientesConectados = new ArrayList<>();
+	
+	public Servidor() {
+	
+		ps.println("INICIANDO SERVIDOR");
+		HiloServidor serv = new HiloServidor();
+		serv.setname("SERVIDOR");
+	
+		serv.start();
+	}
+}
+
+class cli implements Runnable {
+	
+	PrintStream ps = new PrintStream(System.out);
+	
+	String nick = "";
+	Socket sock;
+	Thread hilo;
+	
+	DataOutputStream dos;
+	DataInputStream dis;
+	boolean isConected;
+	
+	
+	public cli(Socket sock, String nick, DataInputStream in, DataOutputStream out) {
+		this.nick = nick;
+		this.sock = sock;
+		this.dis = in;
+		this.dos = out;
+		
+		this.isConected = true;
+		this.hilo = new Thread(this,nick);
+	}
+	
+	
+	public void run() {
+		String msg="";
+		String msgRecibido="";
+		String cli = "";
+		
+		while( sock.isConnected() && this.isConected ) {
+			 try {
+				msgRecibido = dis.readUTF();
+				
+				ps.println("\n"
+                        + Utils.COLORES[1]
+                        + "El cliente " + this.nick
+                        + " envia:"
+                        + msg + "\n\t"
+                        + " al cliente =>"
+                        + Utils.COLORES[2]
+                        + (cli.equals("") ? " Todos" : cli.toUpperCase())
+                        + "\n"
+                        + Utils.RESET
+                );
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}	
+}
+
+
+
+
+class HiloServidor extends Thread{
+	
+}

@@ -1,0 +1,106 @@
+package SocketConThread;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import Download.Utils;
+
+public class Cliente {
+
+	PrintStream ps = new PrintStream(System.out);
+
+	DataInputStream disServidor = null;
+	DataOutputStream dosServidor = null;
+
+	InputStreamReader is = new InputStreamReader(System.in);
+	BufferedReader buff = new BufferedReader(is);
+
+	InetAddress IP = null;
+	int puerto = 7777;
+	Socket sock = null;
+	boolean isConected = false;
+
+	boolean sendNickname = false;
+
+	public Cliente() {
+		try {
+
+			IP = InetAddress.getByName("127.0.0.1");
+			sock = new Socket(IP, puerto);
+		
+			sendNickname = true;
+			
+			disServidor = new DataInputStream(sock.getInputStream());
+			dosServidor = new DataOutputStream(sock.getOutputStream());
+
+			if (sock.isConnected() && sendNickname) {
+				ps.println("Ingrese su ID:");
+				String ID = buff.readLine();
+				dosServidor.writeUTF(ID);
+				sendNickname = false;
+
+				ps.println("Bienvenido al chat " + ID);
+			}
+
+			ps.print("\t->");
+
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Thread enviarMensaje = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String msg = "";
+				while (true && !msg.equalsIgnoreCase("/salir")) {
+					try {
+						msg = buff.readLine();
+
+						dosServidor.writeUTF(msg);
+						ps.print("\t->");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				try {
+					isConected = false;
+					dosServidor.close();
+					disServidor.close();
+					sock.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}, "ENVIO");
+
+		Thread recibirMensaje = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String msg = "";
+				while (true) {
+					 try {
+						msg = disServidor.readUTF();
+						ps.println( Utils.COLORES[0] + msg + Utils.RESET);
+						ps.println("\t ->");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}, "RECIBIR");
+
+		
+		recibirMensaje.start();
+		enviarMensaje.start();
+		}
+
+}
