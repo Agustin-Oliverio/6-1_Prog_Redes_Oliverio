@@ -1,113 +1,107 @@
 package SocketConThread;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-
-import Download.Utils;
 
 public class Cliente {
 
-	PrintStream ps = new PrintStream(System.out);
+    private static final String SERVER_HOST = "127.0.0.1"; // cambiar si el servidor está en otra máquina
+    private static final int SERVER_PORT = 5000;
 
-	DataInputStream disServidor = null;
-	DataOutputStream dosServidor = null;
+    public static void main(String[] args) {
+        new Cliente().runClient();
+    }
 
-	InputStreamReader is = new InputStreamReader(System.in);
-	BufferedReader buff = new BufferedReader(is);
+    public void runClient() {
+        System.out.println(Utils.BLUE + "Intentando conectar con el servidor " + SERVER_HOST + ":" + SERVER_PORT + "..." + Utils.RESET);
+        try (Socket socket = new Socket(InetAddress.getByName(SERVER_HOST), SERVER_PORT);
+             DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
 
-	InetAddress IP = null;
-	int puerto = 7777;
-	Socket sock = null;
-	boolean isConected = false;
+            System.out.println(Utils.GREEN + "Conexión establecida con el servidor." + Utils.RESET);
 
-	boolean sendNickname = false;
+            boolean seguir = true;
+            while (seguir) {
+                // Abrir un JFileChooser para seleccionar archivo
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Seleccionar archivo a enviar");
+                int seleccion = chooser.showOpenDialog(null);
 
-	public Cliente() {
-		try {
+                if (seleccion == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    if (!file.exists() || !file.isFile()) {
+                        System.err.println(Utils.RED + "Archivo inválido seleccionado." + Utils.RESET);
+                        continue;
+                    }
 
-			IP = InetAddress.getByName("127.0.0.1");
-			sock = new Socket(IP, puerto);
-			
-			isConected = true;
-			sendNickname = true;
-			
-			disServidor = new DataInputStream(sock.getInputStream());
-			dosServidor = new DataOutputStream(sock.getOutputStream());
+                    System.out.println(Utils.BLUE + "Preparando envío de: " + file.getAbsolutePath() + Utils.RESET);
 
-			if (sock.isConnected() && sendNickname) {
-				ps.println("Ingrese su ID:");
-				String ID = buff.readLine();
-				dosServidor.writeUTF(ID);
-				sendNickname = false;
+                    // Enviar: nombre (UTF), tamaño (long), luego bytes en bloques
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        dos.writeUTF(file.getName());
+                        dos.flush();
+                        long fileLength = file.length();
+                        dos.writeLong(fileLength);
+                        dos.flush();
 
-				ps.println("Bienvenido al chat " + ID);
-			}
+                        byte[] buffer = new byte[4096];
+                        int read;
+                        long totalSent = 0;
+                        while ((read = fis.read(buffer)) != -1) {
+                            dos.write(buffer, 0, read);
+                            totalSent += read;
+                        }
+                        dos.flush();
 
-			ps.print("\t->");
+                        if (totalSent == fileLength) {
+                            System.out.println(Utils.GREEN + "Envío completado: " + file.getName() + " (" + totalSent + " bytes)." + Utils.RESET);
+                        } else {
+                            System.err.println(Utils.RED + "Se detectó discrepancia en bytes enviados: esperado=" + fileLength + " enviado=" + totalSent + Utils.RESET);
+                        }
+                    } catch (IOException e) {
+                        System.err.println(Utils.RED + "Error durante la lectura/envío del archivo: " + e.getMessage() + Utils.RESET);
+                        // e.printStackTrace();
+                    }
 
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+                    // Preguntar si quiere enviar otro archivo
+                    int resp = JOptionPane.showConfirmDialog(null, "¿Desea enviar otro archivo?", "Enviar otro", JOptionPane.YES_NO_OPTION);
+                    if (resp != JOptionPane.YES_OPTION) {
+                        // enviar señal de FIN al servidor
+                        try {
+                            dos.writeUTF(Utils.FIN_SIGNAL);
+                            dos.flush();
+                        } catch (IOException e) {
+                            System.err.println(Utils.RED + "Error enviando señal de finalización al servidor: " + e.getMessage() + Utils.RESET);
+                        }
+                        seguir = false;
+                        System.out.println(Utils.BLUE + "Finalizando cliente..." + Utils.RESET);
+                    }
+                } else {
+                    // canceló el diálogo de selección
+                    System.out.println(Utils.YELLOW + "Selección de archivo cancelada por el usuario." + Utils.RESET);
+                    int resp = JOptionPane.showConfirmDialog(null, "No se seleccionó archivo. ¿Desea intentar seleccionar otro archivo?", "Continuar", JOptionPane.YES_NO_OPTION);
+                    if (resp != JOptionPane.YES_OPTION) {
+                        // enviar señal de FIN y salir
+                        try {
+                            dos.writeUTF(Utils.FIN_SIGNAL);
+                            dos.flush();
+                        } catch (IOException e) {
+                            // ignore
+                        }
+                        seguir = false;
+                        System.out.println(Utils.BLUE + "Finalizando cliente (sin enviar archivos)..." + Utils.RESET);
+                    }
+                }
+            }
 
-		Thread enviarMensaje = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String msg = "";
-				while (true && !msg.equalsIgnoreCase("/salir")) {
-					try {
-						msg = buff.readLine();
-
-						dosServidor.writeUTF(msg);
-						ps.print("\t->");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				try {
-					isConected = false;
-					dosServidor.close();
-					sock.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}, "ENVIO");
-
-		Thread recibirMensaje = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String msg = "";
-				while (true && isConected) {
-					 try {
-						msg = disServidor.readUTF();
-						ps.println( Utils.COLORES[0] + msg + Utils.RESET);
-						ps.println("\t ->");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				try {
-					isConected = false;
-					disServidor.close();
-					sock.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}				
-			}
-		}, "RECIBIR");
-
-		
-		recibirMensaje.start();
-		enviarMensaje.start();
-		}
-
+        } catch (IOException e) {
+            System.err.println(Utils.RED + "Error de conexión con el servidor: " + e.getMessage() + Utils.RESET);
+            // e.printStackTrace();
+        }
+    }
 }
