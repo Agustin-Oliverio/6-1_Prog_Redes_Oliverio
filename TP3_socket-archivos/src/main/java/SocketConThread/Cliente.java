@@ -11,7 +11,7 @@ import java.net.Socket;
 
 public class Cliente {
 
-    private static final String SERVER_HOST = "127.0.0.1"; // cambiar si el servidor está en otra máquina
+    private static final String SERVER_HOST = "127.0.0.1";
     private static final int SERVER_PORT = 5000;
 
     public static void main(String[] args) {
@@ -27,6 +27,7 @@ public class Cliente {
 
             boolean seguir = true;
             while (seguir) {
+            	
                 // Abrir un JFileChooser para seleccionar archivo
                 JFileChooser chooser = new JFileChooser();
                 chooser.setDialogTitle("Seleccionar archivo a enviar");
@@ -68,10 +69,11 @@ public class Cliente {
                         // e.printStackTrace();
                     }
 
-                    // Preguntar si quiere enviar otro archivo
+                    // Pregunta si quiere enviar otro archivo
                     int resp = JOptionPane.showConfirmDialog(null, "¿Desea enviar otro archivo?", "Enviar otro", JOptionPane.YES_NO_OPTION);
                     if (resp != JOptionPane.YES_OPTION) {
                         // enviar señal de FIN al servidor
+                    	
                         try {
                             dos.writeUTF(Utils.FIN_SIGNAL);
                             dos.flush();
@@ -82,7 +84,8 @@ public class Cliente {
                         System.out.println(Utils.BLUE + "Finalizando cliente..." + Utils.RESET);
                     }
                 } else {
-                    // canceló el diálogo de selección
+                	
+                    // si se cancela el diálogo de selección
                     System.out.println(Utils.YELLOW + "Selección de archivo cancelada por el usuario." + Utils.RESET);
                     int resp = JOptionPane.showConfirmDialog(null, "No se seleccionó archivo. ¿Desea intentar seleccionar otro archivo?", "Continuar", JOptionPane.YES_NO_OPTION);
                     if (resp != JOptionPane.YES_OPTION) {
@@ -91,7 +94,7 @@ public class Cliente {
                             dos.writeUTF(Utils.FIN_SIGNAL);
                             dos.flush();
                         } catch (IOException e) {
-                            // ignore
+                            // ignorar
                         }
                         seguir = false;
                         System.out.println(Utils.BLUE + "Finalizando cliente (sin enviar archivos)..." + Utils.RESET);

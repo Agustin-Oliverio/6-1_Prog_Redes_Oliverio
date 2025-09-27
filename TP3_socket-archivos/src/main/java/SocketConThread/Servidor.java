@@ -9,7 +9,7 @@ import java.net.Socket;
 
 public class Servidor {
 
-    private static final int PUERTO = 5000; // puerto según requisito
+    private static final int PUERTO = 5000;
     private ServerSocket server;
 
     public Servidor() {
@@ -19,7 +19,8 @@ public class Servidor {
             while (true) {
                 Socket cliente = server.accept();
                 System.out.println(Utils.GREEN + "Cliente conectado: " + cliente.getInetAddress().getHostAddress() + Utils.RESET);
-                // Manejar cliente en hilo separado para permitir conexiones múltiples
+                
+                // El cliente se maneja en un hilo separado para permitir varias conexiones
                 new Thread(new Handler(cliente)).start();
             }
         } catch (IOException e) {
@@ -42,13 +43,14 @@ public class Servidor {
 
         @Override
         public void run() {
-            // Carpeta de recepción
+            // Carpeta donde recibir archivo
             File dir = new File("recibido");
             if (!dir.exists()) dir.mkdirs();
 
             try (DataInputStream dis = new DataInputStream(sock.getInputStream())) {
                 while (true) {
-                    // Protocolo: primero nombre de archivo (UTF)
+                	
+                    // Nombre del archivo
                     String fileName = dis.readUTF();
                     if (fileName == null) break;
                     if (fileName.equals(Utils.FIN_SIGNAL)) {
@@ -56,10 +58,11 @@ public class Servidor {
                         break;
                     }
 
-                    long fileLength = dis.readLong(); // tamaño en bytes
+                    
+                    long fileLength = dis.readLong();
                     System.out.println(Utils.BLUE + "Recibiendo archivo: " + fileName + " (" + fileLength + " bytes)..." + Utils.RESET);
 
-                    File outFile = new File(dir, new File(fileName).getName()); // evitar rutas de cliente
+                    File outFile = new File(dir, new File(fileName).getName());
                     try (FileOutputStream fos = new FileOutputStream(outFile)) {
                         byte[] buffer = new byte[4096];
                         long remaining = fileLength;
@@ -76,6 +79,7 @@ public class Servidor {
             } catch (IOException e) {
                 System.err.println(Utils.RED + "Error en la comunicación con cliente " + sock.getInetAddress().getHostAddress() + ": " + e.getMessage() + Utils.RESET);
                 // e.printStackTrace();
+                
             } finally {
                 try { sock.close(); } catch (IOException ignored) {}
                 System.out.println(Utils.BLUE + "Conexión con cliente cerrada: " + sock.getInetAddress().getHostAddress() + Utils.RESET);
