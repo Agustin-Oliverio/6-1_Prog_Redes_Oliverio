@@ -115,7 +115,7 @@ class cli implements Runnable {
 								Utils.COLORES[6] 
 								+ "\t---" 
 								+ this.nick 
-								+ " se ah unido al chat---" 
+								+ " se ha unido al chat---" 
 								+ Utils.RESET);
 					} else {
 						c.dos.writeUTF(
@@ -137,7 +137,7 @@ class cli implements Runnable {
 class HiloServidor extends Thread {
 
 	ServerSocket server;
-	int puerto = 7777;
+	int puerto = 7779;
 	Socket sockAux;
 	PrintStream ps = new PrintStream(System.out);
 

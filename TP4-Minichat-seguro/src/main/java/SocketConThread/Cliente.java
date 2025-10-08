@@ -23,7 +23,7 @@ public class Cliente {
 	BufferedReader buff = new BufferedReader(is);
 
 	InetAddress IP = null;
-	int puerto = 7777;
+	int puerto = 7779;
 	Socket sock = null;
 	boolean isConected = false;
 
@@ -65,6 +65,14 @@ public class Cliente {
 				while (true && !msg.equalsIgnoreCase("/salir")) {
 					try {
 						msg = buff.readLine();
+						
+						if (msg == "/salir") {
+							disServidor.close();
+							dosServidor.close();
+							isConected = false;
+							sock.close();
+							break;
+						}	
 
 						dosServidor.writeUTF(msg);
 						ps.print("\t->");
@@ -72,7 +80,7 @@ public class Cliente {
 						e.printStackTrace();
 					}
 				}
-				try {
+				try {	
 					isConected = false;
 					dosServidor.close();
 					sock.close();
