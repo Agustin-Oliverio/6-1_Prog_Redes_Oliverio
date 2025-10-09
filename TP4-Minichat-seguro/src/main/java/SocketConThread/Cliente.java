@@ -10,6 +10,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+
 import Download.Utils;
 
 public class Cliente {
@@ -28,6 +32,28 @@ public class Cliente {
 	boolean isConected = false;
 
 	boolean sendNickname = false;
+	
+	
+	private static String CLAVE = "1234567890123456"; // 16 chars = 128 bits
+	
+
+	public static String cifrar(String texto) throws Exception {
+	        SecretKeySpec key = new SecretKeySpec(CLAVE.getBytes(), "AES");
+	        Cipher cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.ENCRYPT_MODE, key);
+	        byte[] cifrado = cipher.doFinal(texto.getBytes());
+	        return Base64.getEncoder().encodeToString(cifrado);
+	}
+
+	public static String descifrar(String textoCifrado) throws Exception {
+	        SecretKeySpec key = new SecretKeySpec(CLAVE.getBytes(), "AES");
+	        Cipher cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.DECRYPT_MODE, key);
+	        byte[] decodificado = Base64.getDecoder().decode(textoCifrado);
+	        return new String(cipher.doFinal(decodificado));
+	}
+	
+	
 
 	public Cliente() {
 		try {
@@ -62,30 +88,30 @@ public class Cliente {
 			@Override
 			public void run() {
 				String msg = "";
+				String msgCifrado;
+				try {
+					msgCifrado = cifrar(msg);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				
 				while (true && !msg.equalsIgnoreCase("/salir")) {
 					try {
 						msg = buff.readLine();
 						
 						if (msg == "/salir") {
+							isConected = false;
 							disServidor.close();
 							dosServidor.close();
-							isConected = false;
 							sock.close();
 							break;
 						}	
 
-						dosServidor.writeUTF(msg);
+						dosServidor.writeUTF(msgCifrado);
 						ps.print("\t->");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				}
-				try {	
-					isConected = false;
-					dosServidor.close();
-					sock.close();
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 		}, "ENVIO");
@@ -97,9 +123,10 @@ public class Cliente {
 				while (true && isConected) {
 					 try {
 						msg = disServidor.readUTF();
-						ps.println( Utils.COLORES[0] + msg + Utils.RESET);
+						String msgDescifrado = descifrar(msg);
+						ps.println(Utils.COLORES[0] + msgDescifrado + Utils.RESET);
 						ps.println("\t ->");
-					} catch (IOException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
