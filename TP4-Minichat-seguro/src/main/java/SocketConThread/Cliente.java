@@ -87,29 +87,37 @@ public class Cliente {
 		Thread enviarMensaje = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				ps.print("Melocoton");
 				String msg = "";
-				String msgCifrado;
-				try {
-					msgCifrado = cifrar(msg);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+				String msgCifrado = "";
 				
 				while (true && !msg.equalsIgnoreCase("/salir")) {
+					ps.println("Sarampion");
 					try {
 						msg = buff.readLine();
 						
-						if (msg == "/salir") {
-							isConected = false;
-							disServidor.close();
-							dosServidor.close();
-							sock.close();
-							break;
-						}	
+						if (msg.startsWith("/")) {
+							if (msg.equals("/salir")) {
+								ps.println("Zimbawe");
+								isConected = false;
+								disServidor.close();
+								dosServidor.close();
+								sock.close();
+								break;
+							}
+							
+							dosServidor.writeUTF(msg);
+							ps.print("\t->");
+							
+						}else{
+							msgCifrado = cifrar(msg);
+							dosServidor.writeUTF(msgCifrado);
+							ps.print("\t->");
+							
+						}
 
-						dosServidor.writeUTF(msgCifrado);
-						ps.print("\t->");
-					} catch (IOException e) {
+						
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -123,8 +131,12 @@ public class Cliente {
 				while (true && isConected) {
 					 try {
 						msg = disServidor.readUTF();
-						String msgDescifrado = descifrar(msg);
-						ps.println(Utils.COLORES[0] + msgDescifrado + Utils.RESET);
+						try {
+				            String msgDescifrado = descifrar(msg);
+				            ps.println(Utils.COLORES[0] + msgDescifrado + Utils.RESET);
+				        } catch (Exception e) {
+				            ps.println("[Mensaje del servidor] " + msg);
+				        }
 						ps.println("\t ->");
 					} catch (Exception e) {
 						e.printStackTrace();
