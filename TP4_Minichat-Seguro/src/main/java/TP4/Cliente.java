@@ -33,13 +33,13 @@ public class Cliente {
 			dosServidor = new DataOutputStream(sock.getOutputStream());
 			
 			if (sock.isConnected()) {
-				ps.println(Utils.COLORES[3] + "Ingrese su ID:" + Utils.RESET);
+				ps.println("Ingrese su ID:");
 				String ID = buff.readLine();
 				if (ID == null)
 					ID = "anon";
 				dosServidor.writeUTF(ID);
 				dosServidor.flush();
-				ps.println(Utils.COLORES[0] + "Bienvenido al chat " + ID + Utils.RESET);
+				ps.println("Bienvenido al chat " + ID);
 			}
 			ps.print("\t->");
 		} catch (Exception e) {

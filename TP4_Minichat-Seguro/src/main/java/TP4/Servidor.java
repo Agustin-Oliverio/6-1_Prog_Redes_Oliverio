@@ -200,7 +200,7 @@ class cli implements Runnable {
                     try {
                         synchronized (c.dos) {
                             String msg = joined ? ("\t---" + this.nick + " se ha unido al chat---") : ("\t---" + this.nick + " se ha desconectado---");
-                            c.dos.writeUTF(Utils.COLORES[6] + msg + Utils.RESET);
+                            c.dos.writeUTF(Utils.COLORES[5] + msg + Utils.RESET);
                             c.dos.flush();
                         }
                     } catch (IOException e) {}
@@ -216,7 +216,7 @@ class cli implements Runnable {
 class HiloServidor extends Thread {
 
     ServerSocket server;
-    int puerto = 7777;
+    int puerto = 3500;
     Socket sockAux;
     PrintStream ps = new PrintStream(System.out);
     DataInputStream disCliente;

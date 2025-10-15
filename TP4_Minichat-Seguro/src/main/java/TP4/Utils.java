@@ -11,13 +11,13 @@ public class Utils {
 
     public static final String RESET = "\u001B[0m";
     public static final String[] COLORES = {
-            "\u001B[31m",
-            "\u001B[32m",
-            "\u001B[33m",
-            "\u001B[34m",
-            "\u001B[35m",
-            "\u001B[36m"
-    };
+    	    "\u001B[31m", // rojo
+    	    "\u001B[32m", // verde
+    	    "\u001B[33m", // amarillo
+    	    "\u001B[34m", // azul
+    	    "\u001B[35m", // magenta
+    	    "\u001B[36m"  // cian
+    	};
 
     public static SecureRandom sr = new SecureRandom();
 
